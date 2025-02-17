@@ -1,39 +1,53 @@
 package com.example.vudach;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-
-
-
-
-
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity {
-    private Integer counter = 0;
-    public void onClickBoxes(View View) {
-        counter++;
-        TextView counrrtView= findViewById(R.id.text);
-        counrrtView.setText(counter.toString());
-
-    }
+    private TextView textCounter;
+    private Button buttonClick;
+    private int count = 0; // Количество кликов
+    private static final String PREFS_NAME = "ClickerPrefs"; // Имя файла настроек
+    private static final String KEY_COUNT = "click_count"; // Ключ для сохранения
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+
+        textCounter = findViewById(R.id.textCounter);
+        buttonClick = findViewById(R.id.buttonClick);
+
+        // Загружаем сохраненное значение
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        count = prefs.getInt(KEY_COUNT, 0);
+        updateCounter();
+
+        // Обработчик кликов
+        buttonClick.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                count++;
+                updateCounter();
+                saveCount();
+            }
         });
+    }
+
+    // Метод для обновления текста на экране
+    private void updateCounter() {
+        textCounter.setText("Клики: " + count);
+    }
+
+    // Метод для сохранения счетчика
+    private void saveCount() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(KEY_COUNT, count);
+        editor.apply();
     }
 }
